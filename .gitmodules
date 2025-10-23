@@ -1,0 +1,3 @@
+[submodule "LandscapeAcousticVST/JUCE"]
+	path = LandscapeAcousticVST/JUCE
+	url = https://github.com/juce-framework/JUCE.git
