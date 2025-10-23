@@ -1,0 +1,191 @@
+name: Build and Test LandscapeAcousticVST
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        build_type: [Release]
+        include:
+          - os: ubuntu-latest
+            build_type: Debug
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        
+    - name: Setup CMake
+      uses: jwlawson/actions-setup-cmake@v2
+      with:
+        cmake-version: '3.15'
+    
+    # Install GDAL dependencies
+    - name: Install GDAL (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgdal-dev gdal-bin
+        
+    - name: Install GDAL (macOS) 
+      if: matrix.os == 'macos-latest'
+      run: |
+        brew install gdal
+        
+    - name: Install GDAL (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        # Use vcpkg or pre-built GDAL
+        choco install gdal --version=3.5.2 -y
+        
+    # Install Google Test (for unit testing)
+    - name: Install Google Test (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get install -y libgtest-dev
+        cd /usr/src/gtest
+        sudo cmake CMakeLists.txt
+        sudo make
+        sudo cp lib/*.a /usr/lib
+        
+    - name: Install Google Test (macOS)
+      if: matrix.os == 'macos-latest' 
+      run: |
+        brew install googletest
+        
+    - name: Setup MSVC (Windows)
+      if: matrix.os == 'windows-latest'
+      uses: microsoft/setup-msbuild@v2
+      
+    # Configure and build
+    - name: Configure CMake
+      run: |
+        mkdir build
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        
+    - name: Build
+      run: |
+        cd build
+        cmake --build . --config ${{ matrix.build_type }} --parallel 4
+        
+    # Run tests
+    - name: Run Tests
+      run: |
+        cd build
+        ctest --build-config ${{ matrix.build_type }} --output-on-failure
+        
+    # Upload build artifacts
+    - name: Upload VST3 Plugin (Ubuntu)
+      if: matrix.os == 'ubuntu-latest' && matrix.build_type == 'Release'
+      uses: actions/upload-artifact@v4
+      with:
+        name: LandscapeAcousticVST-Linux-VST3
+        path: build/LandscapeAcousticVST_artefacts/Release/VST3/
+        
+    - name: Upload AU Plugin (macOS)
+      if: matrix.os == 'macos-latest'
+      uses: actions/upload-artifact@v4  
+      with:
+        name: LandscapeAcousticVST-macOS-AU
+        path: build/LandscapeAcousticVST_artefacts/Release/AU/
+        
+    - name: Upload VST3 Plugin (Windows)
+      if: matrix.os == 'windows-latest'
+      uses: actions/upload-artifact@v4
+      with:
+        name: LandscapeAcousticVST-Windows-VST3
+        path: build/LandscapeAcousticVST_artefacts/Release/VST3/
+        
+    # Code coverage (Ubuntu Debug only)
+    - name: Generate Code Coverage
+      if: matrix.os == 'ubuntu-latest' && matrix.build_type == 'Debug'
+      run: |
+        cd build
+        sudo apt-get install -y lcov
+        make coverage || true
+        
+    - name: Upload Coverage to Codecov
+      if: matrix.os == 'ubuntu-latest' && matrix.build_type == 'Debug'
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./build/coverage.info
+        fail_ci_if_error: false
+
+  validation:
+    name: Physics Validation
+    runs-on: ubuntu-latest
+    needs: build
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Install Python dependencies
+      run: |
+        pip install numpy matplotlib scipy
+        
+    - name: Run ISO 9613-2 validation
+      run: |
+        cd scripts/validation
+        python compare_iso9613.py
+        
+    - name: Generate test impulse responses
+      run: |
+        cd scripts/validation  
+        python generate_test_ir.py
+        
+    - name: Upload validation results
+      uses: actions/upload-artifact@v4
+      with:
+        name: validation-results
+        path: scripts/validation/
+
+  package:
+    name: Create Release Package
+    runs-on: ubuntu-latest
+    needs: [build, validation]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      
+    - name: Create release archive
+      run: |
+        mkdir -p release/LandscapeAcousticVST
+        
+        # Copy plugin binaries
+        cp -r LandscapeAcousticVST-*/ release/LandscapeAcousticVST/ || true
+        
+        # Copy documentation and scripts
+        cp README.md release/LandscapeAcousticVST/
+        cp -r scripts/ release/LandscapeAcousticVST/ || true
+        cp -r Resources/ release/LandscapeAcousticVST/ || true
+        
+        # Create archive
+        cd release
+        tar -czf LandscapeAcousticVST-v1.0.0.tar.gz LandscapeAcousticVST/
+        
+    - name: Upload release package
+      uses: actions/upload-artifact@v4
+      with:
+        name: LandscapeAcousticVST-Release-Package
+        path: release/LandscapeAcousticVST-v1.0.0.tar.gz

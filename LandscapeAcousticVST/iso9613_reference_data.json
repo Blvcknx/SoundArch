@@ -1,0 +1,82 @@
+{
+  "Flat terrain, short distance": {
+    "63Hz": 57.56,
+    "125Hz": 52.73,
+    "250Hz": 51.35,
+    "500Hz": 51.12,
+    "1000Hz": 51.2,
+    "2000Hz": 51.45,
+    "4000Hz": 51.95,
+    "8000Hz": 52.95,
+    "parameters": {
+      "name": "Flat terrain, short distance",
+      "distance_m": 100.0,
+      "source_height_m": 2.0,
+      "receiver_height_m": 2.0,
+      "temperature_c": 20.0,
+      "humidity_pct": 70.0,
+      "ground_factor": 1.0,
+      "barrier_height_m": 0.0
+    }
+  },
+  "Flat terrain, medium distance": {
+    "63Hz": 65.01,
+    "125Hz": 65.04,
+    "250Hz": 65.1,
+    "500Hz": 65.22,
+    "1000Hz": 65.85,
+    "2000Hz": 67.12,
+    "4000Hz": 69.49,
+    "8000Hz": 74.25,
+    "parameters": {
+      "name": "Flat terrain, medium distance",
+      "distance_m": 500.0,
+      "source_height_m": 2.0,
+      "receiver_height_m": 2.0,
+      "temperature_c": 15.0,
+      "humidity_pct": 60.0,
+      "ground_factor": 0.0,
+      "barrier_height_m": 0.0
+    }
+  },
+  "Flat terrain, long distance": {
+    "63Hz": 74.12,
+    "125Hz": 71.88,
+    "250Hz": 71.41,
+    "500Hz": 71.56,
+    "1000Hz": 72.93,
+    "2000Hz": 75.72,
+    "4000Hz": 80.97,
+    "8000Hz": 91.47,
+    "parameters": {
+      "name": "Flat terrain, long distance",
+      "distance_m": 1000.0,
+      "source_height_m": 3.0,
+      "receiver_height_m": 1.5,
+      "temperature_c": 25.0,
+      "humidity_pct": 80.0,
+      "ground_factor": 0.5,
+      "barrier_height_m": 0.0
+    }
+  },
+  "With barrier obstruction": {
+    "63Hz": 283.9,
+    "125Hz": 482.58,
+    "250Hz": 891.52,
+    "500Hz": 1711.92,
+    "1000Hz": 3353.42,
+    "2000Hz": 6636.52,
+    "4000Hz": 13202.64,
+    "8000Hz": 26334.89,
+    "parameters": {
+      "name": "With barrier obstruction",
+      "distance_m": 300.0,
+      "source_height_m": 2.0,
+      "receiver_height_m": 2.0,
+      "temperature_c": 20.0,
+      "humidity_pct": 70.0,
+      "ground_factor": 1.0,
+      "barrier_height_m": 5.0
+    }
+  }
+}

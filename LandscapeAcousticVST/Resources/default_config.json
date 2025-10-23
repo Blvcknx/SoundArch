@@ -1,0 +1,46 @@
+{
+  "format_version": "1.0",
+  "export_info": {
+    "date": "2025-10-23",
+    "qgis_version": "3.28",
+    "dem_layer": "SRTM_30m_DEM",
+    "points_layer": "AnalysisPoints"
+  },
+  "files": {
+    "dem_file": "demo_terrain.tif",
+    "dem_relative": "demo_terrain.tif"
+  },
+  "analysis_points": {
+    "source": {
+      "lon": -105.5,
+      "lat": 36.0
+    },
+    "receiver": {
+      "lon": -105.4,
+      "lat": 36.1
+    }
+  },
+  "coordinate_system": {
+    "crs": "EPSG:4326",
+    "description": "WGS 84"
+  },
+  "extent": {
+    "min_lon": -105.51,
+    "max_lon": -105.39,
+    "min_lat": 35.99,
+    "max_lat": 36.11
+  },
+  "default_parameters": {
+    "temperature_C": 15.0,
+    "humidity_percent": 70.0,
+    "ground_type": "porous",
+    "source_height_m": 2.0,
+    "receiver_height_m": 2.0
+  },
+  "metadata": {
+    "description": "Sample configuration for LandscapeAcousticVST plugin",
+    "region": "Northern New Mexico, USA",
+    "terrain_type": "Semi-arid plateau with moderate elevation variation",
+    "notes": "Typical archaeoacoustic analysis scenario in southwestern USA"
+  }
+}

@@ -1,0 +1,23 @@
+[general]
+name=Landscape Acoustic Exporter
+qgisMinimumVersion=3.0
+description=Export DEM and analysis points for LandscapeAcousticVST plugin. Enables seamless workflow between QGIS and real-time acoustic propagation modeling.
+version=1.0.0
+author=SoundArch Development Team
+email=soundarch@example.com
+
+about=This plugin facilitates the export of Digital Elevation Models (DEMs) and analysis points from QGIS for use with the LandscapeAcousticVST audio plugin. It creates properly formatted configuration files and cropped DEM data suitable for ISO 9613-2 acoustic propagation calculations. Supports terrain-based soundscape modeling for archaeological, environmental, and audio production applications.
+
+tracker=https://github.com/soundarch/LandscapeAcousticVST/issues
+repository=https://github.com/soundarch/LandscapeAcousticVST
+homepage=https://soundarch.github.io/LandscapeAcousticVST
+
+tags=acoustic, DEM, terrain, soundscape, archaeoacoustics, audio, propagation, ISO9613
+category=Analysis
+
+icon=icon.png
+experimental=False
+deprecated=False
+
+hasProcessingProvider=no
+changelog=1.0.0 - Initial release with DEM export and point configuration
