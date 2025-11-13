@@ -1,8 +1,8 @@
-# Install script for directory: C:/Users/marco/OneDrive/Skrivebord/Sound/SoundArch/LandscapeAcousticVST/JUCE
+# Install script for directory: D:/SoundArch/LandscapeAcousticVST/JUCE
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "C:/Program Files (x86)/LandscapeAcousticVST")
+  set(CMAKE_INSTALL_PREFIX "C:/Program Files/LandscapeAcousticVST")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -32,48 +32,43 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
   set(CMAKE_CROSSCOMPILING "FALSE")
 endif()
 
-# Set path to fallback-tool for dependency-resolution.
-if(NOT DEFINED CMAKE_OBJDUMP)
-  set(CMAKE_OBJDUMP "C:/msys64/mingw64/bin/objdump.exe")
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
+  include("D:/SoundArch/LandscapeAcousticVST/build/JUCE/tools/modules/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/marco/OneDrive/Skrivebord/Sound/SoundArch/LandscapeAcousticVST/build/JUCE/tools/modules/cmake_install.cmake")
-endif()
-
-if(NOT CMAKE_INSTALL_LOCAL_ONLY)
-  # Include the install script for the subdirectory.
-  include("C:/Users/marco/OneDrive/Skrivebord/Sound/SoundArch/LandscapeAcousticVST/build/JUCE/tools/extras/Build/cmake_install.cmake")
+  include("D:/SoundArch/LandscapeAcousticVST/build/JUCE/tools/extras/Build/cmake_install.cmake")
 endif()
 
 if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/JUCE-8.0.10" TYPE FILE FILES
-    "C:/Users/marco/OneDrive/Skrivebord/Sound/SoundArch/LandscapeAcousticVST/build/JUCE/tools/JUCEConfigVersion.cmake"
-    "C:/Users/marco/OneDrive/Skrivebord/Sound/SoundArch/LandscapeAcousticVST/build/JUCE/tools/JUCEConfig.cmake"
-    "C:/Users/marco/OneDrive/Skrivebord/Sound/SoundArch/LandscapeAcousticVST/JUCE/extras/Build/CMake/JUCECheckAtomic.cmake"
-    "C:/Users/marco/OneDrive/Skrivebord/Sound/SoundArch/LandscapeAcousticVST/JUCE/extras/Build/CMake/JUCEHelperTargets.cmake"
-    "C:/Users/marco/OneDrive/Skrivebord/Sound/SoundArch/LandscapeAcousticVST/JUCE/extras/Build/CMake/JUCEModuleSupport.cmake"
-    "C:/Users/marco/OneDrive/Skrivebord/Sound/SoundArch/LandscapeAcousticVST/JUCE/extras/Build/CMake/JUCEUtils.cmake"
-    "C:/Users/marco/OneDrive/Skrivebord/Sound/SoundArch/LandscapeAcousticVST/JUCE/extras/Build/CMake/JuceLV2Defines.h.in"
-    "C:/Users/marco/OneDrive/Skrivebord/Sound/SoundArch/LandscapeAcousticVST/JUCE/extras/Build/CMake/LaunchScreen.storyboard"
-    "C:/Users/marco/OneDrive/Skrivebord/Sound/SoundArch/LandscapeAcousticVST/JUCE/extras/Build/CMake/PIPAudioProcessor.cpp.in"
-    "C:/Users/marco/OneDrive/Skrivebord/Sound/SoundArch/LandscapeAcousticVST/JUCE/extras/Build/CMake/PIPAudioProcessorWithARA.cpp.in"
-    "C:/Users/marco/OneDrive/Skrivebord/Sound/SoundArch/LandscapeAcousticVST/JUCE/extras/Build/CMake/PIPComponent.cpp.in"
-    "C:/Users/marco/OneDrive/Skrivebord/Sound/SoundArch/LandscapeAcousticVST/JUCE/extras/Build/CMake/PIPConsole.cpp.in"
-    "C:/Users/marco/OneDrive/Skrivebord/Sound/SoundArch/LandscapeAcousticVST/JUCE/extras/Build/CMake/RecentFilesMenuTemplate.nib"
-    "C:/Users/marco/OneDrive/Skrivebord/Sound/SoundArch/LandscapeAcousticVST/JUCE/extras/Build/CMake/UnityPluginGUIScript.cs.in"
-    "C:/Users/marco/OneDrive/Skrivebord/Sound/SoundArch/LandscapeAcousticVST/JUCE/extras/Build/CMake/checkBundleSigning.cmake"
-    "C:/Users/marco/OneDrive/Skrivebord/Sound/SoundArch/LandscapeAcousticVST/JUCE/extras/Build/CMake/copyDir.cmake"
-    "C:/Users/marco/OneDrive/Skrivebord/Sound/SoundArch/LandscapeAcousticVST/JUCE/extras/Build/CMake/juce_runtime_arch_detection.cpp"
-    "C:/Users/marco/OneDrive/Skrivebord/Sound/SoundArch/LandscapeAcousticVST/JUCE/extras/Build/CMake/juce_LinuxSubprocessHelper.cpp"
+    "D:/SoundArch/LandscapeAcousticVST/build/JUCE/tools/JUCEConfigVersion.cmake"
+    "D:/SoundArch/LandscapeAcousticVST/build/JUCE/tools/JUCEConfig.cmake"
+    "D:/SoundArch/LandscapeAcousticVST/JUCE/extras/Build/CMake/JUCECheckAtomic.cmake"
+    "D:/SoundArch/LandscapeAcousticVST/JUCE/extras/Build/CMake/JUCEHelperTargets.cmake"
+    "D:/SoundArch/LandscapeAcousticVST/JUCE/extras/Build/CMake/JUCEModuleSupport.cmake"
+    "D:/SoundArch/LandscapeAcousticVST/JUCE/extras/Build/CMake/JUCEUtils.cmake"
+    "D:/SoundArch/LandscapeAcousticVST/JUCE/extras/Build/CMake/JuceLV2Defines.h.in"
+    "D:/SoundArch/LandscapeAcousticVST/JUCE/extras/Build/CMake/LaunchScreen.storyboard"
+    "D:/SoundArch/LandscapeAcousticVST/JUCE/extras/Build/CMake/PIPAudioProcessor.cpp.in"
+    "D:/SoundArch/LandscapeAcousticVST/JUCE/extras/Build/CMake/PIPAudioProcessorWithARA.cpp.in"
+    "D:/SoundArch/LandscapeAcousticVST/JUCE/extras/Build/CMake/PIPComponent.cpp.in"
+    "D:/SoundArch/LandscapeAcousticVST/JUCE/extras/Build/CMake/PIPConsole.cpp.in"
+    "D:/SoundArch/LandscapeAcousticVST/JUCE/extras/Build/CMake/RecentFilesMenuTemplate.nib"
+    "D:/SoundArch/LandscapeAcousticVST/JUCE/extras/Build/CMake/UnityPluginGUIScript.cs.in"
+    "D:/SoundArch/LandscapeAcousticVST/JUCE/extras/Build/CMake/checkBundleSigning.cmake"
+    "D:/SoundArch/LandscapeAcousticVST/JUCE/extras/Build/CMake/copyDir.cmake"
+    "D:/SoundArch/LandscapeAcousticVST/JUCE/extras/Build/CMake/juce_runtime_arch_detection.cpp"
+    "D:/SoundArch/LandscapeAcousticVST/JUCE/extras/Build/CMake/juce_LinuxSubprocessHelper.cpp"
     )
 endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
 if(CMAKE_INSTALL_LOCAL_ONLY)
-  file(WRITE "C:/Users/marco/OneDrive/Skrivebord/Sound/SoundArch/LandscapeAcousticVST/build/JUCE/tools/install_local_manifest.txt"
+  file(WRITE "D:/SoundArch/LandscapeAcousticVST/build/JUCE/tools/install_local_manifest.txt"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()
 if(CMAKE_INSTALL_COMPONENT)
@@ -89,6 +84,6 @@ else()
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
-  file(WRITE "C:/Users/marco/OneDrive/Skrivebord/Sound/SoundArch/LandscapeAcousticVST/build/JUCE/tools/${CMAKE_INSTALL_MANIFEST}"
+  file(WRITE "D:/SoundArch/LandscapeAcousticVST/build/JUCE/tools/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()

@@ -1,6 +1,9 @@
 #pragma once
 
-#include <JuceHeader.h>
+#include <juce_gui_basics/juce_gui_basics.h>
+#include <juce_gui_extra/juce_gui_extra.h>
+#include <juce_graphics/juce_graphics.h>
+#include <juce_audio_processors/juce_audio_processors.h>
 #include "PluginProcessor.h"
 
 /**
@@ -35,7 +38,13 @@ public:
     // Timer callback for UI updates
     void timerCallback() override;
 
-private:
+public:
+    /**
+     * @brief Set current audio file name (for standalone version)
+     */
+    virtual void setCurrentAudioFile (const juce::String& filename);
+
+protected:
     // Reference to processor
     LandscapeAcousticVSTProcessor& processor;
     
@@ -54,6 +63,8 @@ private:
     juce::TextButton loadDEMButton {"Load DEM File"};
     juce::TextButton importQGISButton {"Import QGIS Config"};
     juce::TextButton exportIRButton {"Export IR"};
+    juce::TextButton zoomInButton {"+"};
+    juce::TextButton zoomOutButton {"-"};
     
     // Parameter controls
     juce::Slider dryWetSlider;
@@ -105,6 +116,10 @@ private:
     juce::Point<double> receiverPoint {0.0, 0.0};
     enum class SelectionMode { None, Source, Receiver } selectionMode = SelectionMode::None;
     
+    // Zoom functionality
+    float zoomLevel = 1.0f;
+    double geoXMin, geoXMax, geoYMin, geoYMax;
+    
     //==============================================================================
     // Methods
     
@@ -124,6 +139,13 @@ private:
     void loadDEMFile();
     void loadQGISConfig();
     void exportImpulseResponse();
+    
+    /**
+     * @brief Zoom functionality
+     */
+    void zoomIn();
+    void zoomOut();
+    void updateGeoBounds();
     
     /**
      * @brief Update terrain display
@@ -151,7 +173,7 @@ private:
     juce::Point<double> pixelToGeo(juce::Point<int> pixel) const;
     
     /**
-     * @brief Convert geographic coordinates to pixel coordinates  
+     * @brief Convert geographic coordinates to pixel coordinates
      */
     juce::Point<int> geoToPixel(juce::Point<double> geo) const;
 

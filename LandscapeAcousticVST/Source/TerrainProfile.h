@@ -1,7 +1,8 @@
 #pragma once
 
 #include <vector>
-#include <JuceHeader.h>
+#include <juce_core/juce_core.h>
+#include <juce_graphics/juce_graphics.h>
 
 /**
  * @brief Structure representing a terrain elevation profile between two points

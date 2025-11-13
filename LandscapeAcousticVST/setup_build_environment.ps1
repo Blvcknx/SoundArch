@@ -38,7 +38,7 @@ try {
     Write-Host "✓ Visual Studio Build Tools installation completed" -ForegroundColor Green
 } catch {
     Write-Host "⚠ Winget installation failed, trying alternative methods..." -ForegroundColor Yellow
-    
+
     # Method 2: Try LLVM/Clang
     try {
         Write-Host "Installing LLVM/Clang as alternative compiler..."
@@ -47,12 +47,12 @@ try {
     } catch {
         Write-Host "⚠ LLVM installation failed" -ForegroundColor Yellow
     }
-    
+
     # Method 3: Try MinGW-w64
     try {
         Write-Host "Installing MSYS2 with MinGW-w64..."
         winget install MSYS2.MSYS2 --accept-source-agreements --accept-package-agreements
-        
+
         # Install MinGW toolchain via MSYS2
         Write-Host "Installing MinGW development tools..."
         & C:\msys64\usr\bin\bash.exe -l -c "pacman -S --noconfirm mingw-w64-x86_64-toolchain mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja mingw-w64-x86_64-gdal"
@@ -131,25 +131,25 @@ if (-not $compilerFound) {
 Write-Host "`n5. CMake Configuration Test..." -ForegroundColor Cyan
 
 # Navigate to project directory
-$projectDir = "C:\Users\marco\OneDrive\Skrivebord\Sound\SoundArch\LandscapeAcousticVST"
+$projectDir = "d:\SoundArch\LandscapeAcousticVST"
 if (Test-Path $projectDir) {
     Set-Location $projectDir
-    
+
     # Create/clean build directory
     if (Test-Path "build") {
         Remove-Item "build" -Recurse -Force
     }
     New-Item -ItemType Directory -Name "build" | Out-Null
     Set-Location "build"
-    
+
     # Try different CMake generators
     $generators = @(
         "Visual Studio 17 2022",
-        "MinGW Makefiles", 
+        "MinGW Makefiles",
         "Unix Makefiles",
         "Ninja"
     )
-    
+
     $success = $false
     foreach ($generator in $generators) {
         try {
@@ -164,11 +164,11 @@ if (Test-Path $projectDir) {
             Write-Host "✗ $generator failed" -ForegroundColor Red
         }
     }
-    
+
     if (-not $success) {
         Write-Host "⚠ CMake configuration failed with all generators" -ForegroundColor Yellow
     }
-    
+
     Set-Location $projectDir
 } else {
     Write-Host "✗ Project directory not found: $projectDir" -ForegroundColor Red
@@ -197,4 +197,8 @@ if ($compilerFound) {
 }
 
 Write-Host "`nPress any key to continue..."
-$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+try {
+    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+} catch {
+    Read-Host "Press Enter to continue"
+}

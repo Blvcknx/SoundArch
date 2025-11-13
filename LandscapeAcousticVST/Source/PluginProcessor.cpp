@@ -189,8 +189,8 @@ void LandscapeAcousticVSTProcessor::processBlock (juce::AudioBuffer<float>& buff
         return;
     }
     
-    float dryWet = *dryWetParam;
-    float outputGain = juce::Decibels::decibelsToGain(*outputGainParam);
+    float dryWet = dryWetParam->load();
+    float outputGain = juce::Decibels::decibelsToGain(outputGainParam->load());
     
     // Store dry signal for mixing
     juce::AudioBuffer<float> dryBuffer;
@@ -247,14 +247,14 @@ void LandscapeAcousticVSTProcessor::getStateInformation (juce::MemoryBlock& dest
     
     if (terrainLoader->isLoaded()) {
         customState.setProperty("terrainFile", 
-                               terrainLoader->getDEMData().filename, nullptr);
+                               juce::var(terrainLoader->getDEMData().filename), nullptr);
     }
     
-    customState.setProperty("sourceX", sourcePoint.x, nullptr);
-    customState.setProperty("sourceY", sourcePoint.y, nullptr);
-    customState.setProperty("receiverX", receiverPoint.x, nullptr);
-    customState.setProperty("receiverY", receiverPoint.y, nullptr);
-    customState.setProperty("pointsSet", pointsAreSet, nullptr);
+    customState.setProperty("sourceX", juce::var(sourcePoint.x), nullptr);
+    customState.setProperty("sourceY", juce::var(sourcePoint.y), nullptr);
+    customState.setProperty("receiverX", juce::var(receiverPoint.x), nullptr);
+    customState.setProperty("receiverY", juce::var(receiverPoint.y), nullptr);
+    customState.setProperty("pointsSet", juce::var(pointsAreSet), nullptr);
     
     std::unique_ptr<juce::XmlElement> xml(state.createXml());
     copyXmlToBinary(*xml, destData);
@@ -399,14 +399,14 @@ void LandscapeAcousticVSTProcessor::updateImpulseResponse()
     
     // Get current parameters
     AtmosphericConditions atmo;
-    atmo.temperature_C = *tempParam;
-    atmo.relativeHumidity = *humidityParam;
+    atmo.temperature_C = tempParam->load();
+    atmo.relativeHumidity = humidityParam->load();
     
     auto groundType = static_cast<GroundType>(
-        static_cast<int>(*groundTypeParam));
+        static_cast<int>(groundTypeParam->load()));
     
-    double sourceHeight = *sourceHeightParam;
-    double receiverHeight = *receiverHeightParam;
+    double sourceHeight = sourceHeightParam->load();
+    double receiverHeight = receiverHeightParam->load();
     
     // Sample terrain profile
     TerrainProfile profile = terrainLoader->sampleProfile(
@@ -429,8 +429,8 @@ void LandscapeAcousticVSTProcessor::updateImpulseResponse()
         // Load into convolution engine (this is thread-safe)
         if (ir.getNumChannels() > 0 && ir.getNumSamples() > 0) {
             convolution.loadImpulseResponse(
-                std::move(ir),
-                currentSampleRate,
+                ir.getReadPointer(0),
+                static_cast<size_t>(ir.getNumSamples() * sizeof(float)),
                 juce::dsp::Convolution::Stereo::yes,
                 juce::dsp::Convolution::Trim::yes,
                 0,

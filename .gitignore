@@ -124,6 +124,10 @@ coverage/
 node_modules/
 jspm_packages/
 
+# Vcpkg (package manager)
+vcpkg/
+vcpkg_installed/
+
 # Optional npm cache directory
 .npm
 

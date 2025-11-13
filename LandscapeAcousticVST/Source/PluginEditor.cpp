@@ -8,6 +8,7 @@ LandscapeAcousticVSTEditor::LandscapeAcousticVSTEditor (LandscapeAcousticVSTProc
     setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
     setupComponents();
     setupAttachments();
+    updateGeoBounds(); // Initialize zoom bounds
     
     // Start timer for regular UI updates
     startTimer(100); // 10 FPS
@@ -21,38 +22,94 @@ LandscapeAcousticVSTEditor::~LandscapeAcousticVSTEditor()
 //==============================================================================
 void LandscapeAcousticVSTEditor::paint (juce::Graphics& g)
 {
-    // Background
-    g.fillAll(juce::Colour(0xff2d2d2d));
-    
-    // Header
-    g.setColour(juce::Colours::white);
+    // Modern gradient background
+    juce::ColourGradient backgroundGradient(
+        juce::Colour(0xff1a1a2e), juce::Point<float>(0, 0),
+        juce::Colour(0xff16213e), juce::Point<float>(0, getHeight()),
+        false);
+    g.setGradientFill(backgroundGradient);
+    g.fillRect(getLocalBounds());
+
+    // Add subtle pattern overlay
+    g.setColour(juce::Colour(0x10ffffff));
+    for (int i = 0; i < getWidth(); i += 20) {
+        g.drawLine(i, 0, i, getHeight(), 1.0f);
+    }
+    for (int i = 0; i < getHeight(); i += 20) {
+        g.drawLine(0, i, getWidth(), i, 1.0f);
+    }
+
+    // Header with modern styling
+    auto headerBounds = juce::Rectangle<int>(MARGIN, 5, getWidth() - 2*MARGIN, 30);
+
+    // Header background with rounded corners
+    g.setColour(juce::Colour(0x20ffffff));
+    g.fillRoundedRectangle(headerBounds.toFloat(), 8.0f);
+
+    // Header border
+    g.setColour(juce::Colour(0x40ffffff));
+    g.drawRoundedRectangle(headerBounds.toFloat(), 8.0f, 1.5f);
+
+    // Header text with shadow
+    g.setColour(juce::Colours::black.withAlpha(0.5f));
     g.setFont(18.0f);
-    g.drawText("Landscape Acoustic VST", MARGIN, 5, getWidth() - 2*MARGIN, 25, 
-               juce::Justification::centred);
-    
+    g.drawText("Landscape Acoustic VST", headerBounds.getX() + 1, headerBounds.getY() + 1,
+               headerBounds.getWidth(), headerBounds.getHeight(), juce::Justification::centred);
+
+    g.setColour(juce::Colour(0xff00d4ff));
+    g.setFont(18.0f);
+    g.drawText("Landscape Acoustic VST", headerBounds.getX(), headerBounds.getY(),
+               headerBounds.getWidth(), headerBounds.getHeight(), juce::Justification::centred);
+
     // Draw terrain visualization
     if (processor.terrainLoader->isLoaded()) {
         drawTerrainMap(g);
     } else {
-        // Draw placeholder for terrain view
-        g.setColour(juce::Colour(0xff1a1a1a));
-        g.fillRect(terrainViewArea);
-        g.setColour(juce::Colours::grey);
-        g.drawRect(terrainViewArea, 1);
-        
-        g.setColour(juce::Colours::lightgrey);
-        g.setFont(14.0f);
-        g.drawText("Drag DEM file here or click 'Load DEM File'", 
-                   terrainViewArea, juce::Justification::centred);
-    }
-    
-    // Drag overlay
-    if (isDraggingFile) {
+        // Modern placeholder for terrain view
+        auto placeholderBounds = terrainViewArea.expanded(2);
+
+        // Background with gradient
+        juce::ColourGradient placeholderGradient(
+            juce::Colour(0xff2a2a3a), placeholderBounds.getTopLeft().toFloat(),
+            juce::Colour(0xff1a1a2a), placeholderBounds.getBottomRight().toFloat(),
+            false);
+        g.setGradientFill(placeholderGradient);
+        g.fillRoundedRectangle(placeholderBounds.toFloat(), 6.0f);
+
+        // Border
+        g.setColour(juce::Colour(0x60ffffff));
+        g.drawRoundedRectangle(placeholderBounds.toFloat(), 6.0f, 2.0f);
+
+        // Icon (simplified mountain symbol)
         g.setColour(juce::Colour(0x80ffffff));
-        g.fillRect(getLocalBounds());
-        g.setColour(juce::Colours::white);
-        g.setFont(20.0f);
-        g.drawText("Drop DEM file to load", getLocalBounds(), juce::Justification::centred);
+        auto iconBounds = placeholderBounds.reduced(20);
+        juce::Path mountainPath;
+        mountainPath.startNewSubPath(iconBounds.getX(), iconBounds.getBottom());
+        mountainPath.lineTo(iconBounds.getCentreX(), iconBounds.getY());
+        mountainPath.lineTo(iconBounds.getRight(), iconBounds.getBottom());
+        mountainPath.closeSubPath();
+        g.fillPath(mountainPath);
+
+        // Text
+        g.setColour(juce::Colour(0xffcccccc));
+        g.setFont(16.0f);
+        g.drawText("Load DEM File to Begin", placeholderBounds.getX(), placeholderBounds.getY() + 40,
+                   placeholderBounds.getWidth(), 25, juce::Justification::centred);
+
+        g.setColour(juce::Colour(0xff888888));
+        g.setFont(12.0f);
+        g.drawText("Drag & drop or click 'Load DEM File'", placeholderBounds.getX(), placeholderBounds.getY() + 65,
+                   placeholderBounds.getWidth(), 20, juce::Justification::centred);
+    }
+
+    // Drag overlay with modern styling
+    if (isDraggingFile) {
+        g.setColour(juce::Colour(0x8000d4ff));
+        g.fillRoundedRectangle(getLocalBounds().toFloat(), 10.0f);
+
+        g.setColour(juce::Colour(0xff00d4ff));
+        g.setFont(24.0f);
+        g.drawText("Drop DEM file here", getLocalBounds(), juce::Justification::centred);
     }
 }
 
@@ -65,13 +122,17 @@ void LandscapeAcousticVSTEditor::resized()
     
     // Top row - file operation buttons
     auto buttonRow = bounds.removeFromTop(BUTTON_HEIGHT + MARGIN);
-    auto buttonWidth = buttonRow.getWidth() / 3 - MARGIN;
+    auto buttonWidth = buttonRow.getWidth() / 5 - MARGIN; // Changed from 3 to 5 buttons
     
     loadDEMButton.setBounds(buttonRow.removeFromLeft(buttonWidth));
     buttonRow.removeFromLeft(MARGIN);
     importQGISButton.setBounds(buttonRow.removeFromLeft(buttonWidth));
     buttonRow.removeFromLeft(MARGIN);
     exportIRButton.setBounds(buttonRow.removeFromLeft(buttonWidth));
+    buttonRow.removeFromLeft(MARGIN);
+    zoomInButton.setBounds(buttonRow.removeFromLeft(buttonWidth));
+    buttonRow.removeFromLeft(MARGIN);
+    zoomOutButton.setBounds(buttonRow.removeFromLeft(buttonWidth));
     
     bounds.removeFromTop(MARGIN);
     
@@ -115,25 +176,64 @@ void LandscapeAcousticVSTEditor::resized()
 //==============================================================================
 void LandscapeAcousticVSTEditor::setupComponents()
 {
-    // File operation buttons
-    addAndMakeVisible(loadDEMButton);
-    addAndMakeVisible(importQGISButton);
-    addAndMakeVisible(exportIRButton);
+    // File operation buttons with modern styling
+    auto setupButton = [this](juce::TextButton& button, const juce::String& text) {
+        addAndMakeVisible(button);
+        button.setButtonText(text);
+
+        // Modern button styling
+        button.setColour(juce::TextButton::buttonColourId, juce::Colour(0xff00d4ff));
+        button.setColour(juce::TextButton::buttonOnColourId, juce::Colour(0xff0099cc));
+        button.setColour(juce::TextButton::textColourOffId, juce::Colours::white);
+        button.setColour(juce::TextButton::textColourOnId, juce::Colours::white);
+    };
+
+    setupButton(loadDEMButton, "Load DEM");
+    setupButton(importQGISButton, "Import QGIS");
+    setupButton(exportIRButton, "Export IR");
+    setupButton(zoomInButton, "+");
+    setupButton(zoomOutButton, "-");
+
+    loadDEMButton.onClick = [this] { 
+        DBG("Load DEM button clicked");
+        loadDEMFile(); 
+    };
+    importQGISButton.onClick = [this] { 
+        DBG("Import QGIS button clicked");
+        loadQGISConfig(); 
+    };
+    exportIRButton.onClick = [this] { 
+        DBG("Export IR button clicked");
+        exportImpulseResponse(); 
+    };
+    zoomInButton.onClick = [this] { 
+        DBG("Zoom in button clicked");
+        zoomIn(); 
+    };
+    zoomOutButton.onClick = [this] { 
+        DBG("Zoom out button clicked");
+        zoomOut(); 
+    };
     
-    loadDEMButton.onClick = [this] { loadDEMFile(); };
-    importQGISButton.onClick = [this] { loadQGISConfig(); };
-    exportIRButton.onClick = [this] { exportImpulseResponse(); };
-    
-    // Parameter sliders
+    // Parameter sliders with modern styling
     auto setupSlider = [this](juce::Slider& slider, juce::Label& label, const juce::String& text) {
         addAndMakeVisible(slider);
         addAndMakeVisible(label);
-        
+
         slider.setSliderStyle(juce::Slider::LinearHorizontal);
         slider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 60, 20);
-        
+
+        // Modern slider colors
+        slider.setColour(juce::Slider::thumbColourId, juce::Colour(0xff00d4ff));
+        slider.setColour(juce::Slider::trackColourId, juce::Colour(0x60ffffff));
+        slider.setColour(juce::Slider::backgroundColourId, juce::Colour(0x20ffffff));
+        slider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::white);
+        slider.setColour(juce::Slider::textBoxBackgroundColourId, juce::Colour(0x20ffffff));
+        slider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colour(0x40ffffff));
+
         label.setText(text, juce::dontSendNotification);
         label.setJustificationType(juce::Justification::centredRight);
+        label.setColour(juce::Label::textColourId, juce::Colour(0xffcccccc));
         label.attachToComponent(&slider, false);
     };
     
@@ -144,30 +244,38 @@ void LandscapeAcousticVSTEditor::setupComponents()
     setupSlider(sourceHeightSlider, sourceHeightLabel, "Source (m):");
     setupSlider(receiverHeightSlider, receiverHeightLabel, "Receiver (m):");
     
-    // Ground type combo
+    // Ground type combo with modern styling
     addAndMakeVisible(groundTypeCombo);
     addAndMakeVisible(groundTypeLabel);
-    
+
     groundTypeCombo.addItem("Hard", 1);
     groundTypeCombo.addItem("Porous", 2);
     groundTypeCombo.addItem("Mixed", 3);
     groundTypeCombo.setSelectedId(2); // Default to Porous
-    
+
+    // Modern combo box colors
+    groundTypeCombo.setColour(juce::ComboBox::backgroundColourId, juce::Colour(0x20ffffff));
+    groundTypeCombo.setColour(juce::ComboBox::textColourId, juce::Colours::white);
+    groundTypeCombo.setColour(juce::ComboBox::outlineColourId, juce::Colour(0x40ffffff));
+    groundTypeCombo.setColour(juce::ComboBox::buttonColourId, juce::Colour(0xff00d4ff));
+    groundTypeCombo.setColour(juce::ComboBox::arrowColourId, juce::Colours::white);
+
     groundTypeLabel.setText("Ground:", juce::dontSendNotification);
     groundTypeLabel.setJustificationType(juce::Justification::centredRight);
+    groundTypeLabel.setColour(juce::Label::textColourId, juce::Colour(0xffcccccc));
     
-    // Status labels
+    // Status labels with modern styling
     addAndMakeVisible(statusLabel);
     addAndMakeVisible(terrainInfoLabel);
     addAndMakeVisible(profileInfoLabel);
-    
+
     statusLabel.setFont(juce::Font(12.0f));
     terrainInfoLabel.setFont(juce::Font(11.0f));
     profileInfoLabel.setFont(juce::Font(11.0f));
-    
-    statusLabel.setColour(juce::Label::textColourId, juce::Colours::lightblue);
-    terrainInfoLabel.setColour(juce::Label::textColourId, juce::Colours::lightgrey);
-    profileInfoLabel.setColour(juce::Label::textColourId, juce::Colours::lightgrey);
+
+    statusLabel.setColour(juce::Label::textColourId, juce::Colour(0xff00d4ff));
+    terrainInfoLabel.setColour(juce::Label::textColourId, juce::Colour(0xffcccccc));
+    profileInfoLabel.setColour(juce::Label::textColourId, juce::Colour(0xffcccccc));
 }
 
 void LandscapeAcousticVSTEditor::setupAttachments()
@@ -254,6 +362,7 @@ void LandscapeAcousticVSTEditor::filesDropped(const juce::StringArray& files, in
             } else {
                 statusLabel.setText("Loaded DEM: " + file.getFileName(), 
                                    juce::dontSendNotification);
+                updateGeoBounds(); // Update zoom bounds for new DEM
             }
         }
     }
@@ -264,43 +373,50 @@ void LandscapeAcousticVSTEditor::filesDropped(const juce::StringArray& files, in
 
 void LandscapeAcousticVSTEditor::loadDEMFile()
 {
-    juce::FileChooser chooser("Select DEM file", juce::File{}, 
+    juce::FileChooser chooser("Select DEM file", juce::File{},
                               "*.tif;*.tiff;*.asc;*.dted;*.hgt;*.img;*.dem");
-    
-    if (chooser.browseForFileToOpen()) {
-        juce::File file = chooser.getResult();
-        juce::String errorMsg;
-        
-        if (processor.loadTerrainFile(file, errorMsg)) {
-            statusLabel.setText("Loaded DEM: " + file.getFileName(), 
-                               juce::dontSendNotification);
-        } else {
-            juce::AlertWindow::showMessageBoxAsync(
-                juce::AlertWindow::WarningIcon,
-                "Load Error",
-                "Failed to load DEM file: " + errorMsg);
+
+    chooser.launchAsync(juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
+                       [this](const juce::FileChooser& fc) {
+        juce::File file = fc.getResult();
+        if (file.existsAsFile()) {
+            juce::String errorMsg;
+
+            if (processor.loadTerrainFile(file, errorMsg)) {
+                statusLabel.setText("Loaded DEM: " + file.getFileName(),
+                                   juce::dontSendNotification);
+                updateGeoBounds(); // Update zoom bounds for new DEM
+            } else {
+                juce::AlertWindow::showMessageBoxAsync(
+                    juce::AlertWindow::WarningIcon,
+                    "Load Error",
+                    "Failed to load DEM file: " + errorMsg);
+            }
         }
-    }
+    });
 }
 
 void LandscapeAcousticVSTEditor::loadQGISConfig()
 {
     juce::FileChooser chooser("Select QGIS config file", juce::File{}, "*.json");
-    
-    if (chooser.browseForFileToOpen()) {
-        juce::File file = chooser.getResult();
-        juce::String errorMsg;
-        
-        if (processor.importQGISConfig(file, errorMsg)) {
-            statusLabel.setText("Loaded QGIS config: " + file.getFileName(),
-                               juce::dontSendNotification);
-        } else {
-            juce::AlertWindow::showMessageBoxAsync(
-                juce::AlertWindow::WarningIcon,
-                "Import Error",
-                "Failed to import QGIS config: " + errorMsg);
+
+    chooser.launchAsync(juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
+                       [this](const juce::FileChooser& fc) {
+        juce::File file = fc.getResult();
+        if (file.existsAsFile()) {
+            juce::String errorMsg;
+
+            if (processor.importQGISConfig(file, errorMsg)) {
+                statusLabel.setText("Loaded QGIS config: " + file.getFileName(),
+                                   juce::dontSendNotification);
+            } else {
+                juce::AlertWindow::showMessageBoxAsync(
+                    juce::AlertWindow::WarningIcon,
+                    "Import Error",
+                    "Failed to import QGIS config: " + errorMsg);
+            }
         }
-    }
+    });
 }
 
 void LandscapeAcousticVSTEditor::exportImpulseResponse()
@@ -312,22 +428,125 @@ void LandscapeAcousticVSTEditor::exportImpulseResponse()
             "Generate an impulse response first by loading DEM and setting analysis points.");
         return;
     }
-    
+
     juce::FileChooser chooser("Export impulse response", juce::File{}, "*.wav");
-    
-    if (chooser.browseForFileToSave(true)) {
-        juce::File file = chooser.getResult();
-        
-        if (processor.exportImpulseResponse(file)) {
-            statusLabel.setText("Exported IR to: " + file.getFileName(),
-                               juce::dontSendNotification);
-        } else {
-            juce::AlertWindow::showMessageBoxAsync(
-                juce::AlertWindow::WarningIcon,
-                "Export Error",
-                "Failed to export impulse response");
+
+    chooser.launchAsync(juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::canSelectFiles,
+                       [this](const juce::FileChooser& fc) {
+        juce::File file = fc.getResult();
+        if (file.existsAsFile() || file.getParentDirectory().exists()) {
+            if (processor.exportImpulseResponse(file)) {
+                statusLabel.setText("Exported IR to: " + file.getFileName(),
+                                   juce::dontSendNotification);
+            } else {
+                juce::AlertWindow::showMessageBoxAsync(
+                    juce::AlertWindow::WarningIcon,
+                    "Export Error",
+                    "Failed to export impulse response");
+            }
         }
+    });
+}
+
+//==============================================================================
+// Zoom functionality
+
+void LandscapeAcousticVSTEditor::zoomIn()
+{
+    if (!processor.terrainLoader->isLoaded()) {
+        return;
     }
+
+    const auto& demData = processor.terrainLoader->getDEMData();
+    auto demBounds = demData.getBounds();
+
+    // Calculate center of current view
+    double centerX = (geoXMin + geoXMax) / 2.0;
+    double centerY = (geoYMin + geoYMax) / 2.0;
+
+    // Increase zoom level
+    zoomLevel = juce::jmin(10.0f, zoomLevel * 1.5f);
+
+    // Calculate new zoomed bounds centered on current view
+    double width = demBounds.getWidth() / zoomLevel;
+    double height = demBounds.getHeight() / zoomLevel;
+
+    geoXMin = centerX - width / 2.0;
+    geoXMax = centerX + width / 2.0;
+    geoYMin = centerY - height / 2.0;
+    geoYMax = centerY + height / 2.0;
+
+    // Clamp to DEM bounds
+    geoXMin = juce::jmax(demBounds.getX(), geoXMin);
+    geoXMax = juce::jmin(demBounds.getRight(), geoXMax);
+    geoYMin = juce::jmax(demBounds.getY(), geoYMin);
+    geoYMax = juce::jmin(demBounds.getBottom(), geoYMax);
+
+    repaint();
+}
+
+void LandscapeAcousticVSTEditor::zoomOut()
+{
+    if (!processor.terrainLoader->isLoaded()) {
+        return;
+    }
+
+    const auto& demData = processor.terrainLoader->getDEMData();
+    auto demBounds = demData.getBounds();
+
+    // Calculate center of current view
+    double centerX = (geoXMin + geoXMax) / 2.0;
+    double centerY = (geoYMin + geoYMax) / 2.0;
+
+    // Decrease zoom level
+    zoomLevel = juce::jmax(0.1f, zoomLevel / 1.5f);
+
+    // Calculate new zoomed bounds centered on current view
+    double width = demBounds.getWidth() / zoomLevel;
+    double height = demBounds.getHeight() / zoomLevel;
+
+    geoXMin = centerX - width / 2.0;
+    geoXMax = centerX + width / 2.0;
+    geoYMin = centerY - height / 2.0;
+    geoYMax = centerY + height / 2.0;
+
+    // Clamp to DEM bounds
+    geoXMin = juce::jmax(demBounds.getX(), geoXMin);
+    geoXMax = juce::jmin(demBounds.getRight(), geoXMax);
+    geoYMin = juce::jmax(demBounds.getY(), geoYMin);
+    geoYMax = juce::jmin(demBounds.getBottom(), geoYMax);
+
+    repaint();
+}
+
+void LandscapeAcousticVSTEditor::updateGeoBounds()
+{
+    if (!processor.terrainLoader->isLoaded()) {
+        return;
+    }
+
+    const auto& demData = processor.terrainLoader->getDEMData();
+    auto demBounds = demData.getBounds();
+
+    // Set zoom bounds to show the entire DEM
+    geoXMin = demBounds.getX();
+    geoXMax = demBounds.getRight();
+    geoYMin = demBounds.getY();
+    geoYMax = demBounds.getBottom();
+
+    // Calculate zoom level based on how much we need to scale to fit
+    double demWidth = demBounds.getWidth();
+    double demHeight = demBounds.getHeight();
+    double viewWidth = terrainViewArea.getWidth();
+    double viewHeight = terrainViewArea.getHeight();
+
+    // Calculate zoom level to fit entire DEM (with some padding)
+    double zoomX = viewWidth / demWidth;
+    double zoomY = viewHeight / demHeight;
+    zoomLevel = juce::jmin(zoomX, zoomY) * 0.95; // 95% to add some margin
+
+    // Don't clamp zoom level - allow showing entire DEM even if it requires zooming out
+    // zoomLevel = juce::jmax(0.01f, zoomLevel); // Allow very small zoom levels for large DEMs
 }
 
 //==============================================================================
@@ -338,74 +557,90 @@ void LandscapeAcousticVSTEditor::drawTerrainMap(juce::Graphics& g)
     if (!processor.terrainLoader->isLoaded()) {
         return;
     }
-    
-    const auto& demData = processor.terrainLoader->getDEMData();
+
     auto bounds = terrainViewArea;
-    
-    // Draw terrain as grayscale heightmap (simplified visualization)
-    // In a full implementation, this would use OpenGL or more sophisticated rendering
-    
-    g.setColour(juce::Colour(0xff404040));
-    g.fillRect(bounds);
-    
-    // Draw border
-    g.setColour(juce::Colours::grey);
-    g.drawRect(bounds, 1);
-    
-    // Draw simplified terrain representation
-    if (demData.isValid()) {
-        // Sample terrain at lower resolution for display
-        int displayWidth = bounds.getWidth();
-        int displayHeight = bounds.getHeight();
-        
-        for (int y = 0; y < displayHeight; y += 4) {
-            for (int x = 0; x < displayWidth; x += 4) {
-                // Map display coordinates to geographic coordinates
-                double geoX = demData.geoTransform[0] + 
-                             (static_cast<double>(x) / displayWidth) * 
-                             (demData.width * demData.geoTransform[1]);
-                double geoY = demData.geoTransform[3] + 
-                             (static_cast<double>(y) / displayHeight) * 
-                             (demData.height * demData.geoTransform[5]);
-                
-                float elevation = processor.terrainLoader->getElevationAt(geoX, geoY);
-                
-                // Simple elevation-based coloring (adjust range as needed)
-                float normalizedElevation = juce::jlimit(0.0f, 1.0f, elevation / 1000.0f);
-                juce::Colour elevationColor = juce::Colour::fromHSV(
-                    0.6f - normalizedElevation * 0.3f, // Blue to brown
-                    0.7f,
-                    0.3f + normalizedElevation * 0.5f,
-                    1.0f);
-                
-                g.setColour(elevationColor);
-                g.fillRect(bounds.getX() + x, bounds.getY() + y, 4, 4);
-            }
-        }
-    }
-    
-    // Draw source and receiver points if set
-    g.setColour(juce::Colours::red);
+
+    // Modern terrain view background with subtle gradient
+    juce::ColourGradient terrainGradient(
+        juce::Colour(0xff1e1e2e), bounds.getTopLeft().toFloat(),
+        juce::Colour(0xff2a2a3a), bounds.getBottomRight().toFloat(),
+        false);
+    g.setGradientFill(terrainGradient);
+    g.fillRoundedRectangle(bounds.toFloat(), 6.0f);
+
+    // Border with glow effect
+    g.setColour(juce::Colour(0x60ffffff));
+    g.drawRoundedRectangle(bounds.toFloat(), 6.0f, 2.0f);
+
+    // Inner border
+    g.setColour(juce::Colour(0x30ffffff));
+    g.drawRoundedRectangle(bounds.reduced(1).toFloat(), 5.0f, 1.0f);
+
+    // Use TerrainRenderer for virtual terrain rendering
+    processor.terrainLoader->getRenderer().render(g, bounds, geoXMin, geoXMax, geoYMin, geoYMax);
+
+    // Draw source and receiver points with modern styling
     if (sourcePoint.x != 0.0 || sourcePoint.y != 0.0) {
         auto sourcePx = geoToPixel(sourcePoint);
-        g.fillEllipse(sourcePx.x - 3, sourcePx.y - 3, 6, 6);
-        g.drawText("S", sourcePx.x - 10, sourcePx.y - 15, 20, 10, juce::Justification::centred);
+
+        // Outer glow
+        g.setColour(juce::Colour(0x80ff4444));
+        g.fillEllipse(sourcePx.x - 6.0f, sourcePx.y - 6.0f, 12.0f, 12.0f);
+
+        // Inner point
+        g.setColour(juce::Colour(0xffff4444));
+        g.fillEllipse(sourcePx.x - 3.0f, sourcePx.y - 3.0f, 6.0f, 6.0f);
+
+        // Label with background
+        g.setColour(juce::Colours::black.withAlpha(0.7f));
+        g.fillRoundedRectangle(sourcePx.x - 12, sourcePx.y - 18, 24, 12, 3.0f);
+        g.setColour(juce::Colours::white);
+        g.setFont(juce::Font(10.0f, juce::Font::bold));
+        g.drawText("S", sourcePx.x - 10, sourcePx.y - 16, 20, 10, juce::Justification::centred);
     }
-    
-    g.setColour(juce::Colours::green);
+
     if (receiverPoint.x != 0.0 || receiverPoint.y != 0.0) {
         auto receiverPx = geoToPixel(receiverPoint);
-        g.fillEllipse(receiverPx.x - 3, receiverPx.y - 3, 6, 6);
-        g.drawText("R", receiverPx.x - 10, receiverPx.y - 15, 20, 10, juce::Justification::centred);
-    }
-    
-    // Draw path between points
-    if ((sourcePoint.x != 0.0 || sourcePoint.y != 0.0) && 
-        (receiverPoint.x != 0.0 || receiverPoint.y != 0.0)) {
+
+        // Outer glow
+        g.setColour(juce::Colour(0x8044ff44));
+        g.fillEllipse(receiverPx.x - 6.0f, receiverPx.y - 6.0f, 12.0f, 12.0f);
+
+        // Inner point
+        g.setColour(juce::Colour(0xff44ff44));
+        g.fillEllipse(receiverPx.x - 3.0f, receiverPx.y - 3.0f, 6.0f, 6.0f);
+
+        // Label with background
+        g.setColour(juce::Colours::black.withAlpha(0.7f));
+        g.fillRoundedRectangle(receiverPx.x - 12, receiverPx.y - 18, 24, 12, 3.0f);
         g.setColour(juce::Colours::white);
+        g.setFont(juce::Font(10.0f, juce::Font::bold));
+        g.drawText("R", receiverPx.x - 10, receiverPx.y - 16, 20, 10, juce::Justification::centred);
+    }
+
+    // Draw path between points with modern styling
+    if ((sourcePoint.x != 0.0 || sourcePoint.y != 0.0) &&
+        (receiverPoint.x != 0.0 || receiverPoint.y != 0.0)) {
         auto sourcePx = geoToPixel(sourcePoint);
         auto receiverPx = geoToPixel(receiverPoint);
-        g.drawLine(sourcePx.x, sourcePx.y, receiverPx.x, receiverPx.y, 1.0f);
+
+        // Glow effect
+        g.setColour(juce::Colour(0x60ffffff));
+        g.drawLine(sourcePx.x, sourcePx.y, receiverPx.x, receiverPx.y, 3.0f);
+
+        // Main line
+        g.setColour(juce::Colour(0xffffff00));
+        g.drawLine(sourcePx.x, sourcePx.y, receiverPx.x, receiverPx.y, 2.0f);
+    }
+
+    // Draw zoom level indicator
+    if (zoomLevel != 1.0f) {
+        g.setColour(juce::Colours::black.withAlpha(0.7f));
+        g.fillRoundedRectangle(bounds.getRight() - 60, bounds.getY() + 5, 55, 20, 5.0f);
+        g.setColour(juce::Colour(0xff00d4ff));
+        g.setFont(juce::Font(11.0f, juce::Font::bold));
+        g.drawText(juce::String::formatted("%.1fx", zoomLevel),
+                   bounds.getRight() - 58, bounds.getY() + 7, 51, 16, juce::Justification::centred);
     }
 }
 
@@ -450,16 +685,13 @@ juce::Point<double> LandscapeAcousticVSTEditor::pixelToGeo(juce::Point<int> pixe
         return {0.0, 0.0};
     }
     
-    const auto& demData = processor.terrainLoader->getDEMData();
-    auto bounds = demData.getBounds();
-    
     // Normalize pixel coordinates to [0,1] within terrain view area
     double normX = static_cast<double>(pixel.x - terrainViewArea.getX()) / terrainViewArea.getWidth();
     double normY = static_cast<double>(pixel.y - terrainViewArea.getY()) / terrainViewArea.getHeight();
     
-    // Map to geographic coordinates
-    double geoX = bounds.getX() + normX * bounds.getWidth();
-    double geoY = bounds.getY() + (1.0 - normY) * bounds.getHeight(); // Flip Y axis
+    // Map to geographic coordinates using zoom bounds
+    double geoX = geoXMin + normX * (geoXMax - geoXMin);
+    double geoY = geoYMax - normY * (geoYMax - geoYMin); // Flip Y axis
     
     return {geoX, geoY};
 }
@@ -470,12 +702,9 @@ juce::Point<int> LandscapeAcousticVSTEditor::geoToPixel(juce::Point<double> geo)
         return {0, 0};
     }
     
-    const auto& demData = processor.terrainLoader->getDEMData();
-    auto bounds = demData.getBounds();
-    
-    // Normalize geographic coordinates
-    double normX = (geo.x - bounds.getX()) / bounds.getWidth();
-    double normY = (geo.y - bounds.getY()) / bounds.getHeight();
+    // Normalize geographic coordinates using zoom bounds
+    double normX = (geo.x - geoXMin) / (geoXMax - geoXMin);
+    double normY = (geo.y - geoYMin) / (geoYMax - geoYMin);
     normY = 1.0 - normY; // Flip Y axis
     
     // Map to pixel coordinates
@@ -483,6 +712,15 @@ juce::Point<int> LandscapeAcousticVSTEditor::geoToPixel(juce::Point<double> geo)
     int pixelY = terrainViewArea.getY() + static_cast<int>(normY * terrainViewArea.getHeight());
     
     return {pixelX, pixelY};
+}
+
+//==============================================================================
+// Virtual method implementations
+
+void LandscapeAcousticVSTEditor::setCurrentAudioFile (const juce::String& filename)
+{
+    // Default implementation - do nothing for VST plugin
+    // Standalone version overrides this
 }
 
 //==============================================================================
@@ -498,13 +736,13 @@ void LandscapeAcousticVSTEditor::updateStatusLabels()
     // Update terrain info
     if (processor.terrainLoader->isLoaded()) {
         const auto& demData = processor.terrainLoader->getDEMData();
-        auto bounds = demData.getBounds();
+        auto demBounds = demData.getBounds();
         
         terrainInfoLabel.setText(
             juce::String::formatted("DEM: %dx%d, %.3f°-%.3f° lon, %.3f°-%.3f° lat",
                                    demData.width, demData.height,
-                                   bounds.getX(), bounds.getRight(),
-                                   bounds.getY(), bounds.getBottom()),
+                                   demBounds.getX(), demBounds.getRight(),
+                                   demBounds.getY(), demBounds.getBottom()),
             juce::dontSendNotification);
         
         // Update profile info if points are set

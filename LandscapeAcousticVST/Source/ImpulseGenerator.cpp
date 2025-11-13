@@ -1,5 +1,7 @@
 #include "ImpulseGenerator.h"
 #include "Utils.h"
+#define _USE_MATH_DEFINES
+#include <cmath>
 #include <algorithm>
 
 ImpulseGenerator::ImpulseGenerator() {

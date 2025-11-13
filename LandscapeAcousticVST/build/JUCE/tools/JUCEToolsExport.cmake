@@ -52,7 +52,7 @@ add_executable(juce_tools::juceaide IMPORTED)
 # Import target "juce_tools::juceaide" for configuration "Custom"
 set_property(TARGET juce_tools::juceaide APPEND PROPERTY IMPORTED_CONFIGURATIONS CUSTOM)
 set_target_properties(juce_tools::juceaide PROPERTIES
-  IMPORTED_LOCATION_CUSTOM "C:/Users/marco/OneDrive/Skrivebord/Sound/SoundArch/LandscapeAcousticVST/build/JUCE/tools/extras/Build/juceaide/juceaide_artefacts/Custom/juceaide.exe"
+  IMPORTED_LOCATION_CUSTOM "D:/SoundArch/LandscapeAcousticVST/build/JUCE/tools/extras/Build/juceaide/juceaide_artefacts/Custom/juceaide.exe"
   )
 
 # This file does not depend on other imported targets which have
