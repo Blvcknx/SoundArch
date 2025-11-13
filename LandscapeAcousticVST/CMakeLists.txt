@@ -173,38 +173,6 @@ if(GDAL_FOUND)
     target_include_directories(LandscapeAcousticVST_Standalone PRIVATE ${GDAL_INCLUDE_DIRS})
 endif()
 
-# Add test application
-add_executable(TestHillshade
-    test_hillshade.cpp
-    Source/TerrainLoader.cpp
-    Source/TerrainRenderer.cpp
-    Source/TerrainProfile.cpp
-    Source/Utils.cpp
-)
-
-target_link_libraries(TestHillshade PRIVATE
-    juce::juce_core
-    juce::juce_events
-)
-
-if(GDAL_FOUND)
-    # target_link_libraries(TestHillshade PRIVATE ${GDAL_LIBRARIES})
-endif()
-
-target_compile_definitions(TestHillshade PUBLIC
-    JUCE_WEB_BROWSER=0
-    JUCE_USE_CURL=0
-)
-
-target_include_directories(TestHillshade PRIVATE
-    Source
-    ${CMAKE_BINARY_DIR}/LandscapeAcousticVST_artefacts/JuceLibraryCode
-)
-
-if(GDAL_FOUND)
-    target_include_directories(TestHillshade PRIVATE ${GDAL_INCLUDE_DIRS})
-endif()
-
 # Platform-specific settings for standalone
 if(WIN32)
     target_link_libraries(LandscapeAcousticVST_Standalone PRIVATE
