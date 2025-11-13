@@ -171,12 +171,25 @@ Desktop.ini
 *.tar
 *.zip
 
-# Executables (generally not needed in repo)
-*.exe
-*.out
-*.app
-*.dylib
-*.so
+# Qt specific files
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+*.moc
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+Makefile*
+*build-*
+
+# Qt Creator
+*.autosave
+
+# Qt Linguist
+*.qm
+*.ts
 
 # VST plugin files (built binaries)
 *.vst3
