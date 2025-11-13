@@ -89,33 +89,53 @@ A real-time terrain-based sound propagation VST plugin that simulates outdoor ac
 
 ## DEM Viewer
 
-A standalone Qt-based application for visualizing Digital Elevation Models (DEMs) with professional GDAL hillshade rendering.
+Two options are available for visualizing DEM hillshade images:
 
-### Features
-- **Interactive Visualization**: Zoom, pan, and explore terrain with mouse controls
-- **GDAL Hillshade**: Professional terrain shading compatible with QGIS
-- **Multiple Formats**: Support for GeoTIFF, ASCII Grid, DTED, SRTM, and more
-- **Automatic Processing**: Generates hillshade files automatically
-- **Color Mapping**: Terrain-appropriate color gradients for enhanced visualization
+### Option 1: OpenCV Viewer (Recommended - Lightweight)
 
-### Building the Viewer
+A simple, fast C++ application using OpenCV for hillshade visualization:
+
+#### Features
+- **Fast Loading**: Direct image loading with minimal dependencies
+- **Interactive Controls**: Mouse wheel zoom and click-drag pan
+- **Cross-platform**: Works on Windows, macOS, and Linux
+- **No Qt Required**: Only needs OpenCV (much lighter than Qt)
+
+#### Quick Start
 ```bash
-cd viewer
-# Windows
-.\build.bat
+# Generate hillshade
+gdaldem hillshade input_dem.tif hillshade.tif
 
-# macOS/Linux
-mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-make
+# View with OpenCV
+cd opencv_viewer
+.\build.bat  # Windows
+cd build/bin
+.\opencv_hillshade_viewer.exe ../hillshade.tif
 ```
 
-### Prerequisites
-- **Qt5** (5.15.2 recommended) - Download from [qt.io/download](https://www.qt.io/download)
-- **GDAL Library** (same as main plugin)
-- **CMake** (3.15+)
+#### Prerequisites
+- **OpenCV 4.x**: Install via `vcpkg install opencv4[contrib]` (Windows)
+- **CMake 3.15+**
+- **C++17 compiler**
 
-See `viewer/README.md` for detailed installation and troubleshooting instructions.
+See `opencv_viewer/README.md` for detailed setup instructions.
+
+### Option 2: Qt Viewer (Full GUI)
+
+A complete Qt-based application with advanced features:
+
+#### Features
+- **Professional GUI**: File dialogs, menus, and toolbars
+- **Advanced Visualization**: Color mapping and terrain gradients
+- **Integrated Workflow**: Seamless DEM loading and processing
+- **QGIS Compatibility**: Identical hillshade rendering
+
+#### Prerequisites
+- **Qt 5.15.2**: Download from qt.io/download
+- **GDAL Library**
+- **CMake 3.15+**
+
+See `viewer/README.md` for installation and usage details.
 
 ## QGIS Integration
 
@@ -227,6 +247,11 @@ LandscapeAcousticVST/
 │   ├── AcousticEngine.cpp  # ISO 9613-2 propagation calculations
 │   ├── TerrainProfile.cpp  # Elevation profile sampling
 │   └── Utils.cpp          # Utility functions
+├── opencv_viewer/         # Lightweight OpenCV-based hillshade viewer
+│   ├── main.cpp           # Interactive hillshade viewer with pan/zoom
+│   ├── CMakeLists.txt     # OpenCV build configuration
+│   ├── build.bat          # Windows build script
+│   └── README.md          # Setup and usage instructions
 ├── viewer/                # Qt-based DEM visualization application
 │   ├── main.cpp           # Complete Qt application with GDAL integration
 │   ├── CMakeLists.txt     # Qt5 + GDAL build configuration
