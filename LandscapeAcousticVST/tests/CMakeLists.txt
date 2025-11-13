@@ -10,6 +10,7 @@ add_executable(unit_tests
     unit/test_acoustic_engine.cpp
     unit/test_fresnel_diffraction.cpp
     unit/test_terrain_profile.cpp
+    unit/test_terrain_loader.cpp
     unit/test_impulse_generator.cpp
     unit/test_utils.cpp
 )

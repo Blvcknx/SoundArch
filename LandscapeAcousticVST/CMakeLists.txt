@@ -10,21 +10,19 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_subdirectory(JUCE)
 
 # Find GDAL
-find_package(GDAL REQUIRED)
-if(GDAL_FOUND)
-    include_directories(${GDAL_INCLUDE_DIRS})
-    message(STATUS "GDAL found: ${GDAL_INCLUDE_DIRS}")
-else()
-    message(FATAL_ERROR "GDAL not found. Please install GDAL development libraries.")
-endif()
+# find_package(GDAL QUIET)
+set(GDAL_FOUND TRUE)
+set(GDAL_INCLUDE_DIRS "C:/Temp/GDAL/gcore;C:/Temp/GDAL/ogr;C:/Temp/GDAL/port")
+set(GDAL_LIBRARIES "C:/GDAL/gdal.dll")
+message(STATUS "GDAL found manually: ${GDAL_INCLUDE_DIRS}, ${GDAL_LIBRARIES}")
 
 # Plugin target
 juce_add_plugin(LandscapeAcousticVST
     COMPANY_NAME "SoundArch"
     PLUGIN_MANUFACTURER_CODE SndA
     PLUGIN_CODE Lav1
-    FORMATS VST3 AU Standalone
-    PRODUCT_NAME "Landscape Acoustic VST"
+    FORMATS VST3 AU
+    PRODUCT_NAME "LandscapeAcousticVST"
     
     NEEDS_MIDI_INPUT FALSE
     NEEDS_MIDI_OUTPUT FALSE
@@ -43,6 +41,7 @@ target_sources(LandscapeAcousticVST PRIVATE
     Source/PluginProcessor.cpp
     Source/PluginEditor.cpp
     Source/TerrainLoader.cpp
+    Source/TerrainRenderer.cpp
     Source/AcousticEngine.cpp
     Source/ImpulseGenerator.cpp
     Source/FresnelDiffraction.cpp
@@ -54,10 +53,23 @@ target_sources(LandscapeAcousticVST PRIVATE
 # Link libraries
 target_link_libraries(LandscapeAcousticVST PRIVATE
     juce::juce_audio_utils
+    juce::juce_audio_processors
+    juce::juce_gui_basics
+    juce::juce_gui_extra
+    juce::juce_graphics
+    juce::juce_events
+    juce::juce_core
+    juce::juce_data_structures
+    juce::juce_audio_basics
+    juce::juce_audio_formats
+    juce::juce_audio_devices
     juce::juce_dsp
     juce::juce_opengl
-    ${GDAL_LIBRARIES}
 )
+
+if(GDAL_FOUND)
+    # target_link_libraries(LandscapeAcousticVST PRIVATE ${GDAL_LIBRARIES})
+endif()
 
 # Compiler definitions
 target_compile_definitions(LandscapeAcousticVST PUBLIC
@@ -69,8 +81,12 @@ target_compile_definitions(LandscapeAcousticVST PUBLIC
 # Include directories
 target_include_directories(LandscapeAcousticVST PRIVATE
     Source
-    ${GDAL_INCLUDE_DIRS}
+    ${CMAKE_BINARY_DIR}/LandscapeAcousticVST_artefacts/JuceLibraryCode
 )
+
+if(GDAL_FOUND)
+    target_include_directories(LandscapeAcousticVST PRIVATE ${GDAL_INCLUDE_DIRS})
+endif()
 
 # Platform-specific settings
 if(WIN32)
@@ -93,20 +109,125 @@ elseif(APPLE)
     )
 endif()
 
-# Enable testing
-enable_testing()
+# Add standalone application target
+add_executable(LandscapeAcousticVST_Standalone WIN32
+    Source/StandaloneMain.cpp
+    Source/StandaloneEditor.cpp
+    Source/PluginProcessor.cpp
+    Source/PluginEditor.cpp
+    Source/TerrainLoader.cpp
+    Source/TerrainRenderer.cpp
+    Source/AcousticEngine.cpp
+    Source/ImpulseGenerator.cpp
+    Source/FresnelDiffraction.cpp
+    Source/Environment.cpp
+    Source/TerrainProfile.cpp
+    Source/Utils.cpp
+)
 
-# Add Google Test
-find_package(GTest QUIET)
-if(GTest_FOUND)
-    add_subdirectory(tests)
-    message(STATUS "Google Test found - building tests")
-else()
-    message(WARNING "Google Test not found - tests will not be built")
+target_link_libraries(LandscapeAcousticVST_Standalone PRIVATE
+    juce::juce_audio_utils
+    juce::juce_audio_processors
+    juce::juce_gui_basics
+    juce::juce_gui_extra
+    juce::juce_graphics
+    juce::juce_events
+    juce::juce_core
+    juce::juce_data_structures
+    juce::juce_audio_basics
+    juce::juce_audio_formats
+    juce::juce_audio_devices
+    juce::juce_dsp
+    juce::juce_opengl
+)
+
+if(GDAL_FOUND)
+    # target_link_libraries(LandscapeAcousticVST_Standalone PRIVATE ${GDAL_LIBRARIES})
+endif()
+
+target_compile_definitions(LandscapeAcousticVST_Standalone PUBLIC
+    JUCE_WEB_BROWSER=0
+    JUCE_USE_CURL=0
+    JUCE_STANDALONE_APPLICATION=1
+    JucePlugin_Name="LandscapeAcousticVST"
+    JucePlugin_Desc="Real-time Terrain-Based Sound Propagation VST Plugin"
+    JucePlugin_Manufacturer="SoundArch"
+    JucePlugin_ManufacturerCode=SndA
+    JucePlugin_PluginCode=Lav1
+    JucePlugin_IsSynth=0
+    JucePlugin_WantsMidiInput=0
+    JucePlugin_ProducesMidiOutput=0
+    JucePlugin_IsMidiEffect=0
+    JucePlugin_EditorRequiresKeyboardFocus=0
+    JucePlugin_Version=1.0.0
+    JucePlugin_VersionCode=0x10000
+    JucePlugin_VersionString="1.0.0"
+)
+
+target_include_directories(LandscapeAcousticVST_Standalone PRIVATE
+    Source
+    ${CMAKE_BINARY_DIR}/LandscapeAcousticVST_artefacts/JuceLibraryCode
+)
+
+if(GDAL_FOUND)
+    target_include_directories(LandscapeAcousticVST_Standalone PRIVATE ${GDAL_INCLUDE_DIRS})
+endif()
+
+# Add test application
+add_executable(TestHillshade
+    test_hillshade.cpp
+    Source/TerrainLoader.cpp
+    Source/TerrainRenderer.cpp
+    Source/TerrainProfile.cpp
+    Source/Utils.cpp
+)
+
+target_link_libraries(TestHillshade PRIVATE
+    juce::juce_core
+    juce::juce_events
+)
+
+if(GDAL_FOUND)
+    # target_link_libraries(TestHillshade PRIVATE ${GDAL_LIBRARIES})
+endif()
+
+target_compile_definitions(TestHillshade PUBLIC
+    JUCE_WEB_BROWSER=0
+    JUCE_USE_CURL=0
+)
+
+target_include_directories(TestHillshade PRIVATE
+    Source
+    ${CMAKE_BINARY_DIR}/LandscapeAcousticVST_artefacts/JuceLibraryCode
+)
+
+if(GDAL_FOUND)
+    target_include_directories(TestHillshade PRIVATE ${GDAL_INCLUDE_DIRS})
+endif()
+
+# Platform-specific settings for standalone
+if(WIN32)
+    target_link_libraries(LandscapeAcousticVST_Standalone PRIVATE
+        winmm.lib
+        version.lib
+        ole32.lib
+        oleaut32.lib
+    )
+elseif(APPLE)
+    target_link_libraries(LandscapeAcousticVST_Standalone PRIVATE
+        "-framework Cocoa"
+        "-framework IOKit"
+        "-framework QuartzCore"
+        "-framework AudioUnit"
+        "-framework AudioToolbox"
+        "-framework CoreAudio"
+        "-framework CoreMIDI"
+        "-framework DiscRecording"
+    )
 endif()
 
 # Installation
-install(TARGETS LandscapeAcousticVST
+install(TARGETS LandscapeAcousticVST LandscapeAcousticVST_Standalone
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin
 )

@@ -1,49 +1,29 @@
 #pragma once
 
 #include "TerrainProfile.h"
-#include <JuceHeader.h>
-#include <gdal_priv.h>
-#include <ogr_spatialref.h>
+#include "TerrainRenderer.h"
+#include <juce_core/juce_core.h>
+// #include <gdal_priv.h>
+// #include <ogr_spatialref.h>
 #include <memory>
 #include <vector>
 
-/**
- * @brief Data structure containing loaded DEM information
- */
-struct DEMData {
-    std::vector<float> elevations;      // Elevation values (row-major order)
-    double geoTransform[6];             // GDAL geotransform coefficients
-    int width, height;                  // Raster dimensions
-    std::unique_ptr<OGRSpatialReference> srs; // Spatial reference system
-    juce::String filename;              // Source filename
-    double noDataValue;                 // No-data value
-    bool hasNoDataValue;                // Whether no-data value is defined
-    
-    DEMData();
-    ~DEMData() = default;
-    
-    // Move-only semantics
-    DEMData(const DEMData&) = delete;
-    DEMData& operator=(const DEMData&) = delete;
-    DEMData(DEMData&&) = default;
-    DEMData& operator=(DEMData&&) = default;
-    
-    /**
-     * @brief Check if DEM data is valid
-     */
-    bool isValid() const;
-    
-    /**
-     * @brief Get geographic bounds of DEM
-     */
-    juce::Rectangle<double> getBounds() const;
-};
+// Forward declaration for GDAL types
+#ifdef GDAL_FOUND
+class GDALDataset;
+class GDALRasterBand;
+#else
+// Stub for when GDAL is not available
+using GDALDataset = void;
+using GDALRasterBand = void;
+#endif
 
 /**
  * @brief GDAL-based terrain data loader for Digital Elevation Models
  * 
  * Supports multiple DEM formats: GeoTIFF, ASC, DTED, HGT, SRTM
  * Provides elevation sampling and profile extraction for acoustic modeling.
+ * Uses virtual rendering for large files through TerrainRenderer.
  */
 class TerrainLoader {
 public:
@@ -57,6 +37,11 @@ public:
      * @return True if loaded successfully
      */
     bool loadDEM(const juce::File& demFile, juce::String& errorMsg);
+    
+    /**
+     * @brief Load ASCII grid format DEM
+     */
+    bool loadASCIIGrid(const juce::File& ascFile, juce::String& errorMsg);
     
     /**
      * @brief Get elevation at geographic coordinates (with interpolation)
@@ -83,12 +68,24 @@ public:
     /**
      * @brief Get loaded DEM data
      */
-    const DEMData& getDEMData() const { return demData; }
+    const DEMData& getDEMData() const { return renderer.getDEMData(); }
+    
+    /**
+     * @brief Get terrain renderer for visualization
+     */
+    TerrainRenderer& getRenderer() { return renderer; }
+    const TerrainRenderer& getRenderer() const { return renderer; }
     
     /**
      * @brief Check if DEM is loaded
      */
-    bool isLoaded() const { return dataset != nullptr && demData.isValid(); }
+    bool isLoaded() const {
+#ifdef GDAL_FOUND
+        return dataset != nullptr && renderer.getDEMData().isValid();
+#else
+        return renderer.getDEMData().isValid();
+#endif
+    }
     
     /**
      * @brief Get supported file extensions
@@ -101,8 +98,14 @@ public:
     static bool isValidDEMFile(const juce::File& file);
     
 private:
+#ifdef GDAL_FOUND
     GDALDataset* dataset;
-    DEMData demData;
+    GDALRasterBand* band;
+    GDALDataset* hillshadeDataset;
+    GDALRasterBand* hillshadeBand;
+#endif
+    TerrainRenderer renderer;
+    bool gdalInitialized;
     
     /**
      * @brief Initialize GDAL library
@@ -128,4 +131,14 @@ private:
      * @brief Close current dataset
      */
     void closeDEM();
+    
+    /**
+     * @brief Generate hillshade for the loaded DEM using GDAL
+     */
+    bool generateHillshade(const juce::File& demFile, juce::String& errorMsg);
+    
+    /**
+     * @brief Load hillshade dataset
+     */
+    bool loadHillshade(const juce::File& hillshadeFile, juce::String& errorMsg);
 };
