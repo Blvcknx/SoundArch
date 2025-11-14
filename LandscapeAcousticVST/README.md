@@ -106,7 +106,11 @@ A simple, fast C++ application using OpenCV for hillshade visualization:
 # Generate hillshade
 gdaldem hillshade input_dem.tif hillshade.tif
 
-# View with OpenCV
+# View with OpenCV (simple method - no OpenCV installation needed!)
+cd opencv_viewer
+.\simple_viewer.bat "../Resources/test_data/test_terrain.asc"
+
+# OR build full OpenCV viewer (requires OpenCV installation)
 cd opencv_viewer
 .\build.bat  # Windows
 cd build/bin
