@@ -13,9 +13,8 @@ jobs:
       with:
         submodules: recursive
         
-    - name: Install GDAL Dependency
-      # Dropped the specific version to pull the latest available package
-      run: choco install gdal -y
+    - name: Install GDAL (vcpkg)
+      run: vcpkg install gdal:x64-windows
         
     - name: Setup MSVC
       uses: microsoft/setup-msbuild@v2
@@ -25,8 +24,7 @@ jobs:
         cd LandscapeAcousticVST
         mkdir build
         cd build
-        # Added explicit GDAL_ROOT path mapping based on the repo's documentation
-        cmake .. -DCMAKE_BUILD_TYPE=Release -DGDAL_ROOT="C:\Program Files\GDAL"
+        cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake"
         
     - name: Compile VST3
       run: |
