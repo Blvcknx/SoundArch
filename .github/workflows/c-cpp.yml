@@ -1,0 +1,38 @@
+name: Build VST3 (Windows)
+
+on:
+  workflow_dispatch: # This allows you to trigger the build manually
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        
+    - name: Install GDAL Dependency
+      run: choco install gdal --version=3.5.2 -y
+        
+    - name: Setup MSVC
+      uses: microsoft/setup-msbuild@v2
+      
+    - name: Configure CMake
+      run: |
+        cd LandscapeAcousticVST
+        mkdir build
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=Release
+        
+    - name: Compile VST3
+      run: |
+        cd LandscapeAcousticVST/build
+        cmake --build . --config Release --parallel 4
+        
+    - name: Upload VST3 Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: LandscapeAcousticVST-VST3
+        path: LandscapeAcousticVST/build/LandscapeAcousticVST_artefacts/Release/VST3/
