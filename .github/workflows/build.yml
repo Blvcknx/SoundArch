@@ -22,14 +22,12 @@ jobs:
     - name: Configure CMake
       run: |
         cd LandscapeAcousticVST
-        mkdir build
-        cd build
-        cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake"
+        cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake"
         
     - name: Compile VST3
       run: |
-        cd LandscapeAcousticVST/build
-        cmake --build . --config Release --parallel 4
+        cd LandscapeAcousticVST
+        cmake --build build --config Release --parallel 4
         
     - name: Upload VST3 Artifact
       uses: actions/upload-artifact@v4
