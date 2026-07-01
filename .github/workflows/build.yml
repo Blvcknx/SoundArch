@@ -13,6 +13,10 @@ jobs:
       with:
         submodules: recursive
         
+    - name: Clean stale committed build folder
+      run: |
+        if (Test-Path "LandscapeAcousticVST/build") { Remove-Item -Recurse -Force "LandscapeAcousticVST/build" }
+        
     - name: Install GDAL (vcpkg)
       run: vcpkg install gdal:x64-windows
         
